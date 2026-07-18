@@ -2,7 +2,7 @@
 
 **Hiring signals = buying signals.** When a company posts multiple roles for "RevOps", "GTM Strategy", or "Sales Engineering," they aren't just looking for talent—they are actively feeling operational pain and evaluating new tools. This project automates the discovery of these high-intent prospects at scale by orchestrating LLMs and browser automation, turning public job boards into a highly qualified, automated lead pipeline.
 
-<video src="https://github.com/NivedhN160/Browser-Use-Hackathon/raw/main/assets/demo.mp4" controls="controls" muted="muted" style="max-height:640px;">
+<video src="./assets/demo.mp4" controls="controls" muted="muted" width="100%">
   Your browser does not support the video tag.
 </video>
 
