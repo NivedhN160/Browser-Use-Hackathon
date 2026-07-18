@@ -1,3 +1,12 @@
+/**
+ * test.js
+ * 
+ * Native Node.js test suite to validate the core orchestration logic.
+ * Ensures the agent correctly targets GTM keywords, respects token limits,
+ * and robustly handles invalid LLM output without crashing.
+ * 
+ * Run with: npm test
+ */
 const test = require('node:test');
 const assert = require('node:assert');
 const { parseScoreResponse, filterRelevantRoles } = require('./orchestrate.js');

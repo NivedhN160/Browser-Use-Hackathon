@@ -16,6 +16,13 @@ const SIGNAL_KEYWORDS = [
   "GTM",
 ];
 
+/**
+ * Fetches open roles for a given company using the Greenhouse API adapter.
+ * This is the fast, programmatic path for ATS systems that expose clean JSON.
+ *
+ * @param {string} companySlug - The URL slug of the company.
+ * @returns {Array<Object>|null} List of role objects or null if the request fails.
+ */
 function getRoles(companySlug) {
   try {
     const raw = execSync(`npx webcmd greenhouse jobs --company ${companySlug} -f json`, {
@@ -29,6 +36,13 @@ function getRoles(companySlug) {
   }
 }
 
+/**
+ * Scrapes open roles for a given company using the Lever browser automation adapter.
+ * Launches a headed Chrome instance to navigate and extract data from the live DOM.
+ *
+ * @param {string} companySlug - The URL slug of the company.
+ * @returns {Array<Object>|null} List of role objects or null if the request fails.
+ */
 function getBrowserRoles(companySlug) {
   try {
     const raw = execSync(`npx webcmd lever jobs --company ${companySlug} --window foreground -f json`, {
@@ -42,6 +56,14 @@ function getBrowserRoles(companySlug) {
   }
 }
 
+/**
+ * Safely parses the JSON output from the LLM, handling markdown fences 
+ * and normalizing malformed matching_roles arrays into flat strings.
+ *
+ * @param {string} text - The raw text response from Groq.
+ * @param {string} companySlug - The company being scored (used for fallback logging).
+ * @returns {Object} A standardized scoring object.
+ */
 function parseScoreResponse(text, companySlug) {
   try {
     const parsed = JSON.parse(text.replace(/```json|```/g, "").trim());
@@ -56,6 +78,13 @@ function parseScoreResponse(text, companySlug) {
   }
 }
 
+/**
+ * Filters a raw array of job roles to find those related to Sales, Marketing, 
+ * GTM, and RevOps. Limits output to 50 items to conserve LLM context window tokens.
+ *
+ * @param {Array<Object>} roles - The raw array of roles from the ATS.
+ * @returns {Array<Object>} A filtered and capped array of roles.
+ */
 function filterRelevantRoles(roles) {
     if (!roles) return [];
     return roles.filter(r => 
@@ -64,6 +93,14 @@ function filterRelevantRoles(roles) {
     ).slice(0, 50);
 }
 
+/**
+ * Prompts the LLaMA 3.1 model to score a company's buying intent based on 
+ * their currently open RevOps and GTM roles.
+ *
+ * @param {string} companySlug - The name of the company.
+ * @param {Array<Object>} roles - The filtered list of relevant roles.
+ * @returns {Promise<Object>} The parsed scoring object containing score, matches, and reasoning.
+ */
 async function scoreCompany(companySlug, roles) {
   const prompt = `Company: ${companySlug}
 Open roles: ${JSON.stringify(roles.map(r => ({ title: r.title, department: r.department })))}
@@ -86,6 +123,11 @@ Respond ONLY with JSON, no markdown fences:
   return parseScoreResponse(text, companySlug);
 }
 
+/**
+ * The main orchestration loop.
+ * Iterates through configured companies, fetches roles via API or Browser adapters,
+ * filters them, scores them via LLM, and prints a ranked terminal output.
+ */
 async function main() {
   const results = [];
   const totalCompanies = COMPANIES.length + LEVER_COMPANIES.length;
