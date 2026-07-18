@@ -1,4 +1,6 @@
-# Buying-Signal Scanner
+# 🚀 Buying-Signal Scanner
+
+![Hackathon](https://img.shields.io/badge/Hackathon-Browser--Use-blue?style=for-the-badge) ![Groq](https://img.shields.io/badge/Powered_by-Groq-orange?style=for-the-badge) ![LLaMA 3.1](https://img.shields.io/badge/Model-LLaMA_3.1-green?style=for-the-badge)
 
 **Hiring signals = buying signals.** When a company posts multiple roles for "RevOps", "GTM Strategy", or "Sales Engineering," they aren't just looking for talent—they are actively feeling operational pain and evaluating new tools. This project automates the discovery of these high-intent prospects at scale by orchestrating LLMs and browser automation, turning public job boards into a highly qualified, automated lead pipeline.
 
@@ -8,9 +10,12 @@
 
 ---
 
-## Sample Output
+## 📊 Sample Output
 
-Skimming for prospects? Here is exactly what the orchestrator outputs after scraping and scoring:
+Skimming for prospects? Click below to see exactly what the orchestrator outputs after scraping and scoring:
+
+<details>
+<summary><b>🔍 Click to expand: Real Ranked Results</b></summary>
 
 ```text
 === RANKED BUYING SIGNALS ===
@@ -23,6 +28,7 @@ Skimming for prospects? Here is exactly what the orchestrator outputs after scra
       matches: Paid Revenue Manager, Marketing Technology Manager, Lead Growth Manager- UK/IE/NL
       why: Roles related to growth, revenue, and marketing tech indicate a need for sales and marketing automation tools, signaling a need for RevOps/GTM integration.
 ```
+</details>
 
 ## Why Two Data Sources?
 
@@ -47,28 +53,37 @@ The architecture consists of three layers:
 - **Platform Usage (`webcmd`):** Proves the "record once, execute forever" concept by abstracting messy job board DOMs into a single CLI command that feeds perfectly into an AI agent.
 - **Completeness:** A fully functioning, end-to-end pipeline with error handling, UX-friendly CLI output, colored terminal ranking, and a working demo.
 
-## Setup
-1. **Prerequisites**: Ensure you have Node 20+ installed.
-2. **Install webcmd globally**:
-   ```bash
-   npm install -g @agentrhq/webcmd
-   ```
-3. **Install project dependencies**:
-   ```bash
-   npm install
-   ```
-4. **Environment Variables**:
-   Copy the example environment file and add your Groq API key:
-   ```bash
-   cp .env.example .env
-   ```
-   Add your key to `.env`: `GROQ_API_KEY=your_key_here`
+## 🛠️ Setup & Usage
 
-## Usage
+<details>
+<summary><b>⚙️ Click to expand: Installation and Run Instructions</b></summary>
+
+### 1. Prerequisites
+Ensure you have Node 20+ installed.
+
+### 2. Install webcmd globally
+```bash
+npm install -g @agentrhq/webcmd
+```
+
+### 3. Install project dependencies
+```bash
+npm install
+```
+
+### 4. Environment Variables
+Copy the example environment file and add your Groq API key:
+```bash
+cp .env.example .env
+```
+Add your key to `.env`: `GROQ_API_KEY=your_key_here`
+
+### 5. Usage
 Run the orchestration script to execute the scanner across the configured companies:
 ```bash
 npm start
 ```
+</details>
 
 ## Known limitations
 - Currently supports **Greenhouse** and **Lever** job boards only. (Support for Ashby, Workday, etc., can be easily added by authoring new `webcmd` adapters).
