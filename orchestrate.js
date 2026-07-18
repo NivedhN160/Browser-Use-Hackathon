@@ -62,7 +62,13 @@ Respond ONLY with JSON, no markdown fences:
 
   const text = resp.choices[0]?.message?.content || "{}";
   try {
-    return JSON.parse(text.replace(/```json|```/g, "").trim());
+    const parsed = JSON.parse(text.replace(/```json|```/g, "").trim());
+    if (Array.isArray(parsed.matching_roles)) {
+      parsed.matching_roles = parsed.matching_roles.map(r =>
+        typeof r === "string" ? r : (r.title || JSON.stringify(r))
+      );
+    }
+    return parsed;
   } catch {
     return { company: companySlug, score: 0, matching_roles: [], reasoning: "parse failed" };
   }
