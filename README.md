@@ -14,10 +14,14 @@
 
 ## 📊 Sample Output
 
-Skimming for prospects? Click below to see exactly what the orchestrator outputs after scraping and scoring:
+Skimming for prospects? Here is exactly what the orchestrator outputs after scraping and scoring:
+
+<p align="center">
+  <img src="./assets/output.png" alt="Terminal Output Showing Scored Leads" width="100%">
+</p>
 
 <details>
-<summary><b>🔍 Click to expand: Real Ranked Results</b></summary>
+<summary><b>🔍 Click to expand: Raw Text Output</b></summary>
 
 ```text
 === RANKED BUYING SIGNALS ===
