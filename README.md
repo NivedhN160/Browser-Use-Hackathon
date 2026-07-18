@@ -7,6 +7,8 @@
 <video src="./assets/demo.mp4" controls="controls" muted="muted" width="100%">
   Your browser does not support the video tag.
 </video>
+<br/>
+<p align="center"><i>If the video above doesn't load, <b><a href="./assets/demo.mp4">click here to watch the demo</a></b></i></p>
 
 ---
 
