@@ -1,30 +1,11 @@
-/**
- * Buying-Signal Scanner — orchestration script
- *
- * PREREQUISITE: you must have already had your agent author the adapter:
- *   webcmd greenhouse jobs --company <slug>
- * and confirmed it returns JSON like:
- *   [{ "title": "...", "department": "...", "location": "...", "url": "..." }]
- *
- * This script just does the boring part: loop it across companies,
- * score each with Claude, print a ranked table.
- *
- * Setup:
- *   npm install groq-sdk
- *   Get a free key at https://console.groq.com/keys
- *   export GROQ_API_KEY=your_key
- *   node orchestrate.js
- */
-
 const { execSync } = require("child_process");
 require("dotenv").config();
 const Groq = require("groq-sdk");
 
-const groq = new Groq(); // reads GROQ_API_KEY from env
-const MODEL = "llama-3.1-8b-instant"; // free tier, fast, plenty for this classification task
+const groq = new Groq();
+const MODEL = "llama-3.1-8b-instant";
 
-// Edit this list live during the demo — start with 4-5 known Greenhouse companies
-const COMPANIES = ["airbnb", "stripe", "notion", "figma", "linear"];
+const COMPANIES = ["airbnb", "stripe", "figma", "discord", "webflow"];
 
 const SIGNAL_KEYWORDS = [
   "RevOps",
@@ -54,13 +35,14 @@ Open roles: ${JSON.stringify(roles.map(r => ({ title: r.title, department: r.dep
 Score 0-10 how strongly these open roles signal that this company needs a
 RevOps / GTM / Marketing Automation / Sales tool right now.
 Base the score on matches against: ${SIGNAL_KEYWORDS.join(", ")}.
+List at most 5 matching_roles even if more match. Keep reasoning under 40 words.
 
 Respond ONLY with JSON, no markdown fences:
 {"company": "...", "score": 0, "matching_roles": ["..."], "reasoning": "..."}`;
 
   const resp = await groq.chat.completions.create({
     model: MODEL,
-    max_tokens: 200, // keep it tight — output is just short JSON
+    max_tokens: 350,
     messages: [{ role: "user", content: prompt }],
   });
 
