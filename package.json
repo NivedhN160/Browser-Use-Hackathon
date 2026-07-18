@@ -1,9 +1,10 @@
 {
   "name": "browser-use-hackathon",
   "version": "1.0.0",
-  "description": "",
+  "description": "Buying-Signal Scanner that automates GTM/RevOps lead generation using webcmd and Groq.",
   "main": "orchestrate.js",
   "scripts": {
+    "start": "node orchestrate.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {

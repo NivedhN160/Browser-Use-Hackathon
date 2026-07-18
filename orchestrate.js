@@ -75,8 +75,9 @@ Respond ONLY with JSON, no markdown fences:
 async function main() {
   const results = [];
 
-  for (const company of COMPANIES) {
-    console.log(`Checking ${company}...`);
+  for (let i = 0; i < COMPANIES.length; i++) {
+    const company = COMPANIES[i];
+    console.log(`\x1b[36m[${i + 1}/${COMPANIES.length}]\x1b[0m Checking \x1b[1m${company}\x1b[0m...`);
     const roles = getRoles(company);
     if (!roles || roles.length === 0) continue;
 
@@ -91,11 +92,12 @@ async function main() {
 
   results.sort((a, b) => b.score - a.score);
 
-  console.log("\n=== RANKED BUYING SIGNALS ===\n");
+  console.log("\n\x1b[1m\x1b[36m=== RANKED BUYING SIGNALS ===\x1b[0m\n");
   for (const r of results) {
-    console.log(`${r.score.toString().padStart(2)}/10  ${r.company}`);
-    console.log(`      matches: ${r.matching_roles.join(", ") || "none"}`);
-    console.log(`      why: ${r.reasoning}\n`);
+    const scoreColor = r.score >= 8 ? "\x1b[32m" : r.score >= 5 ? "\x1b[33m" : "\x1b[90m";
+    console.log(`${scoreColor}\x1b[1m${r.score.toString().padStart(2)}/10\x1b[0m  \x1b[1m${r.company}\x1b[0m`);
+    console.log(`      \x1b[90mmatches:\x1b[0m ${r.matching_roles.join(", ") || "none"}`);
+    console.log(`      \x1b[90mwhy:\x1b[0m ${r.reasoning}\n`);
   }
 }
 
