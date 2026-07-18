@@ -23,6 +23,7 @@
   "homepage": "https://github.com/NivedhN160/Browser-Use-Hackathon#readme",
   "dependencies": {
     "@agentrhq/webcmd": "^0.3.4",
+    "cheerio": "^1.2.0",
     "dotenv": "^17.4.2",
     "groq-sdk": "^1.3.0"
   }

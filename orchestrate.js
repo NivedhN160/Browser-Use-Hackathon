@@ -6,6 +6,7 @@ const groq = new Groq();
 const MODEL = "llama-3.1-8b-instant";
 
 const COMPANIES = ["airbnb", "stripe", "figma", "discord", "webflow"];
+const LEVER_COMPANIES = ["palantir", "spotify"];
 
 const SIGNAL_KEYWORDS = [
   "RevOps",
@@ -20,6 +21,19 @@ function getRoles(companySlug) {
     const raw = execSync(`npx webcmd greenhouse jobs --company ${companySlug} -f json`, {
       encoding: "utf-8",
       timeout: 30000,
+    });
+    return JSON.parse(raw);
+  } catch (err) {
+    console.error(`[warn] ${companySlug} failed:`, err.message.split("\n")[0]);
+    return null;
+  }
+}
+
+function getBrowserRoles(companySlug) {
+  try {
+    const raw = execSync(`npx webcmd lever jobs --company ${companySlug} --window foreground -f json`, {
+      encoding: "utf-8",
+      timeout: 60000,
     });
     return JSON.parse(raw);
   } catch (err) {
@@ -56,12 +70,17 @@ Respond ONLY with JSON, no markdown fences:
 
 async function main() {
   const results = [];
+  const totalCompanies = COMPANIES.length + LEVER_COMPANIES.length;
+  let i = 0;
 
-  for (let i = 0; i < COMPANIES.length; i++) {
-    const company = COMPANIES[i];
-    console.log(`\x1b[36m[${i + 1}/${COMPANIES.length}]\x1b[0m Checking \x1b[1m${company}\x1b[0m...`);
+  for (const company of COMPANIES) {
+    console.log(`\x1b[36m[${i + 1}/${totalCompanies}]\x1b[0m Checking \x1b[1m${company}\x1b[0m...`);
     const roles = getRoles(company);
-    if (!roles || roles.length === 0) continue;
+    if (!roles || roles.length === 0) {
+      console.log(`\x1b[90m      → no roles found for ${company}\x1b[0m`);
+      i++;
+      continue;
+    }
 
     const relevantRoles = roles.filter(r => 
         /sales|marketing|growth|ops|gtm|revenue|revops/i.test(r.title) || 
@@ -69,7 +88,29 @@ async function main() {
     ).slice(0, 50);
 
     const scored = await scoreCompany(company, relevantRoles.length > 0 ? relevantRoles : roles.slice(0, 10));
+    scored.source = "greenhouse-api";
     results.push(scored);
+    i++;
+  }
+
+  for (const company of LEVER_COMPANIES) {
+    console.log(`\x1b[36m[${i + 1}/${totalCompanies}]\x1b[0m Checking \x1b[1m${company}\x1b[0m...`);
+    const roles = getBrowserRoles(company);
+    if (!roles || roles.length === 0) {
+      console.log(`\x1b[90m      → no roles found for ${company}\x1b[0m`);
+      i++;
+      continue;
+    }
+
+    const relevantRoles = roles.filter(r => 
+        /sales|marketing|growth|ops|gtm|revenue|revops/i.test(r.title) || 
+        /sales|marketing|growth|ops|gtm|revenue|revops/i.test(r.department)
+    ).slice(0, 50);
+
+    const scored = await scoreCompany(company, relevantRoles.length > 0 ? relevantRoles : roles.slice(0, 10));
+    scored.source = "lever-browser";
+    results.push(scored);
+    i++;
   }
 
   results.sort((a, b) => b.score - a.score);
@@ -77,7 +118,7 @@ async function main() {
   console.log("\n\x1b[1m\x1b[36m=== RANKED BUYING SIGNALS ===\x1b[0m\n");
   for (const r of results) {
     const scoreColor = r.score >= 8 ? "\x1b[32m" : r.score >= 5 ? "\x1b[33m" : "\x1b[90m";
-    console.log(`${scoreColor}\x1b[1m${r.score.toString().padStart(2)}/10\x1b[0m  \x1b[1m${r.company}\x1b[0m`);
+    console.log(`${scoreColor}\x1b[1m${r.score.toString().padStart(2)}/10\x1b[0m  \x1b[1m${r.company}\x1b[0m \x1b[90m[${r.source}]\x1b[0m`);
     console.log(`      \x1b[90mmatches:\x1b[0m ${r.matching_roles.join(", ") || "none"}`);
     console.log(`      \x1b[90mwhy:\x1b[0m ${r.reasoning}\n`);
   }

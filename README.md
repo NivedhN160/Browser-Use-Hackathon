@@ -5,8 +5,10 @@ This project is a Buying-Signal Scanner that automates the process of identifyin
 
 ## How it works
 The architecture consists of three layers:
-1. **webcmd adapter**: A compiled browser adapter (`webcmd greenhouse jobs`) that programmatically visits Greenhouse job boards and returns stable JSON (`[{title, department, location, url}]`) without fragile scraping scripts.
-2. **orchestrator loop**: A Node.js script (`orchestrate.js`) that runs the adapter across a batch of target companies (e.g. Airbnb, Stripe, Discord).
+1. **webcmd adapters (Dual-Path)**: 
+   - **API-backed**: `webcmd greenhouse jobs` programmatically visits Greenhouse job boards and returns stable JSON by directly querying the public API for speed.
+   - **Browser-automation**: `webcmd lever jobs` launches a real headed Chrome browser to navigate Lever job boards, evaluate the DOM, and scrape `.posting` elements because Lever lacks a clean public JSON API.
+2. **orchestrator loop**: A Node.js script (`orchestrate.js`) that runs the adapters across a batch of target companies (e.g., Airbnb, Stripe for Greenhouse; Palantir, Spotify for Lever).
 3. **LLM scoring**: A scoring step where the extracted roles are sent to Groq (`llama-3.1-8b-instant`), which scores each company 0-10 on their need for a GTM/Sales tool based on the presence of relevant open roles.
 
 ## Setup
@@ -37,5 +39,5 @@ npm start
 <!-- Placeholder for demo GIF/screen recording -->
 
 ## Known limitations
-- Currently supports **Greenhouse** job boards only. (Support for Lever, Ashby, etc. can be added by authoring new `webcmd` adapters).
+- Currently supports **Greenhouse** and **Lever** job boards only. (Support for Ashby, Workday, etc., can be added by authoring new `webcmd` adapters).
 - Free-tier rate limits on Groq might throttle requests if the company list is very large. The script pre-filters roles to minimize token burn.
