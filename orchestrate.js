@@ -42,6 +42,28 @@ function getBrowserRoles(companySlug) {
   }
 }
 
+function parseScoreResponse(text, companySlug) {
+  try {
+    const parsed = JSON.parse(text.replace(/```json|```/g, "").trim());
+    if (Array.isArray(parsed.matching_roles)) {
+      parsed.matching_roles = parsed.matching_roles.map(r =>
+        typeof r === "string" ? r : (r.title || JSON.stringify(r))
+      );
+    }
+    return parsed;
+  } catch {
+    return { company: companySlug, score: 0, matching_roles: [], reasoning: "parse failed" };
+  }
+}
+
+function filterRelevantRoles(roles) {
+    if (!roles) return [];
+    return roles.filter(r => 
+        /sales|marketing|growth|ops|gtm|revenue|revops/i.test(r.title) || 
+        /sales|marketing|growth|ops|gtm|revenue|revops/i.test(r.department)
+    ).slice(0, 50);
+}
+
 async function scoreCompany(companySlug, roles) {
   const prompt = `Company: ${companySlug}
 Open roles: ${JSON.stringify(roles.map(r => ({ title: r.title, department: r.department })))}
@@ -61,17 +83,7 @@ Respond ONLY with JSON, no markdown fences:
   });
 
   const text = resp.choices[0]?.message?.content || "{}";
-  try {
-    const parsed = JSON.parse(text.replace(/```json|```/g, "").trim());
-    if (Array.isArray(parsed.matching_roles)) {
-      parsed.matching_roles = parsed.matching_roles.map(r =>
-        typeof r === "string" ? r : (r.title || JSON.stringify(r))
-      );
-    }
-    return parsed;
-  } catch {
-    return { company: companySlug, score: 0, matching_roles: [], reasoning: "parse failed" };
-  }
+  return parseScoreResponse(text, companySlug);
 }
 
 async function main() {
@@ -88,10 +100,7 @@ async function main() {
       continue;
     }
 
-    const relevantRoles = roles.filter(r => 
-        /sales|marketing|growth|ops|gtm|revenue|revops/i.test(r.title) || 
-        /sales|marketing|growth|ops|gtm|revenue|revops/i.test(r.department)
-    ).slice(0, 50);
+    const relevantRoles = filterRelevantRoles(roles);
 
     const scored = await scoreCompany(company, relevantRoles.length > 0 ? relevantRoles : roles.slice(0, 10));
     scored.source = "greenhouse-api";
@@ -108,10 +117,7 @@ async function main() {
       continue;
     }
 
-    const relevantRoles = roles.filter(r => 
-        /sales|marketing|growth|ops|gtm|revenue|revops/i.test(r.title) || 
-        /sales|marketing|growth|ops|gtm|revenue|revops/i.test(r.department)
-    ).slice(0, 50);
+    const relevantRoles = filterRelevantRoles(roles);
 
     const scored = await scoreCompany(company, relevantRoles.length > 0 ? relevantRoles : roles.slice(0, 10));
     scored.source = "lever-browser";
@@ -130,4 +136,8 @@ async function main() {
   }
 }
 
-main();
+if (require.main === module) {
+  main();
+}
+
+module.exports = { parseScoreResponse, filterRelevantRoles, scoreCompany, getRoles, getBrowserRoles, main };
